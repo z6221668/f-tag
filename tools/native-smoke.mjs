@@ -256,6 +256,39 @@ try {
       'native API save',
     );
     console.log('NATIVE EDITOR PASS: mouse interaction, single grade, remarks and undo');
+    const beforeClear = (await api({ type: 'GET_STATE' })).state;
+    dom = await nodes();
+    await click(
+      dom.find(
+        (node) =>
+          attributes(node).class === 'trigger' &&
+          attributes(node)['aria-label'] === '标记用户 Alice',
+      ),
+    );
+    await wait(100);
+    dom = await nodes();
+    await setValue(
+      dom.find((node) => node.nodeName === 'SELECT'),
+      'clear',
+      context,
+    );
+    await click(
+      dom.find((node) => node.nodeName === 'BUTTON' && attributes(node).type === 'submit'),
+    );
+    await wait(250);
+    const cleared = (await api({ type: 'GET_STATE' })).state;
+    assert.ok(!cleared.users.some((user) => user.site === site && user.id === identity.id));
+    assert.deepEqual(cleared.tags, beforeClear.tags);
+    dom = await nodes();
+    assert.ok(!dom.some((node) => attributes(node).role === 'dialog'));
+    await click(
+      dom.find((node) => node.nodeName === 'BUTTON' && attributes(node).class === 'secondary'),
+    );
+    await wait(250);
+    assert.deepEqual((await api({ type: 'GET_STATE' })).state.users, beforeClear.users);
+    console.log(
+      'NATIVE CLEAR PASS: clear selection removes the record, keeps the tag library and supports undo',
+    );
     const optionsURL = await evaluate('chrome.runtime.getURL("options.html")', context);
     await cdp.send('Page.navigate', { url: optionsURL });
     await wait(350);

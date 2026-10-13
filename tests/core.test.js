@@ -110,6 +110,41 @@ test('stale editors cannot overwrite a later record', () => {
     /其他页面/,
   );
 });
+test('saving an empty existing mark removes it, while ungraded tags and notes remain valid', () => {
+  const library = C.reduce(C.fresh(), {
+    type: 'SAVE_TAG',
+    tag: { name: '广告', color: '#123456' },
+  });
+  let state = mark(library);
+  const previous = state.users[0];
+  state = C.reduce(state, {
+    type: 'SET_USER',
+    user: { ...previous, levelId: null, tagIds: [], note: '  ' },
+    expectedRecord: C.recordToken(previous),
+  });
+  assert.equal(state.users.length, 0);
+  assert.deepEqual(state.tags, library.tags);
+  state = mark(state, { ...user(), levelId: null, tagIds: [state.tags[0].id], note: '' });
+  assert.equal(state.users[0].levelId, null);
+  assert.equal(state.users[0].tagIds.length, 1);
+  state = mark(state, { ...user(), levelId: null, tagIds: [], note: '保留备注' });
+  assert.equal(state.users[0].note, '保留备注');
+  const token = C.recordToken(state.users[0]);
+  const changed = mark(state, { ...user(), note: '另一页的修改' });
+  assert.throws(
+    () =>
+      C.reduce(changed, {
+        type: 'SET_USER',
+        user: { ...user(), levelId: null, tagIds: [], note: '' },
+        expectedRecord: token,
+      }),
+    /其他页面/,
+  );
+  assert.throws(
+    () => mark(C.fresh(), { ...user(), levelId: null, tagIds: [], note: '' }),
+    /请选择/,
+  );
+});
 test('invalid references, unsafe sources, dates and duplicate tags are rejected', () => {
   const state = C.fresh();
   const before = structuredClone(state);

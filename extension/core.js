@@ -337,8 +337,10 @@
             Array.isArray(identity.tagIds) &&
             !identity.tagIds.length &&
             !identity.note?.trim()
-          )
+          ) {
+            if (previous) break;
             throw new Error('请选择等级、标签或填写备注');
+          }
           next.users.push({
             ...identity,
             createdAt: previous ? previous.createdAt : now,

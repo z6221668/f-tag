@@ -496,6 +496,10 @@
             'aria-label': tag.name,
             onchange: () => {
               checkbox.checked ? selected.add(tag.id) : selected.delete(tag.id);
+              if (checkbox.checked && level.value === 'clear') {
+                level.value = '';
+                feedback.textContent = '';
+              }
               updateSummary();
             },
           });
@@ -545,7 +549,8 @@
       state = next;
       const chosenLevel = level.options.length ? level.value : original?.levelId || '';
       level.replaceChildren(
-        element('option', { value: '', text: '不设置等级' }),
+        element('option', { value: '', text: '选择等级（可选）', disabled: '' }),
+        element('option', { value: 'clear', text: '清除标签' }),
         ...state.levels.map((item) => element('option', { value: item.id, text: item.name })),
       );
       level.value = chosenLevel;
@@ -602,6 +607,7 @@
           if (!tagName) throw new Error('请输入标签名称');
           const next = await createTag({ name: tagName, color: color.value });
           selected.add(next.tags.find((tag) => tag.name === tagName).id);
+          if (level.value === 'clear') level.value = '';
           name.value = '';
           search.value = '';
           create.open = false;
@@ -655,6 +661,30 @@
         add.click();
       }
     });
+    level.addEventListener('change', () => {
+      if (level.value === 'clear') {
+        selected.clear();
+        note.value = '';
+        source.value = '';
+        name.value = '';
+        search.value = '';
+        managing = false;
+        hideConfirmation();
+        create.open = false;
+        refresh(state);
+        feedback.textContent = '保存后清除此用户的标记，标签库会保留。';
+      } else {
+        feedback.textContent = '';
+      }
+      updateSummary();
+    });
+    note.addEventListener('input', () => {
+      if (level.value === 'clear' && note.value.trim()) {
+        level.value = '';
+        feedback.textContent = '';
+        updateSummary();
+      }
+    });
     form.addEventListener('input', updateSummary);
     form.addEventListener('change', updateSummary);
     form.addEventListener('submit', (event) => {
@@ -667,6 +697,13 @@
         create.open = true;
         error.textContent = '新标签尚未创建，请先点击“创建并选中”，或清空名称后保存标记。';
         name.focus();
+        return;
+      }
+      if (
+        level.value === 'clear' ||
+        (original && !level.value && !selected.size && !note.value.trim())
+      ) {
+        busy(() => remove({ user: identity, expectedRecord }));
         return;
       }
       busy(() =>

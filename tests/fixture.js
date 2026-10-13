@@ -249,6 +249,34 @@
       document.querySelectorAll('[data-user-tags-host]').length === before,
       'plugin mutations do not duplicate hosts',
     );
+    marks('author').querySelector('button').click();
+    const grade = panel().querySelector('select');
+    assert(
+      [...grade.options].some((option) => option.textContent === '清除标签'),
+      'clear action is explicitly named',
+    );
+    grade.value = 'clear';
+    grade.dispatchEvent(new Event('change', { bubbles: true }));
+    click(panel(), '保存标记');
+    await wait(180);
+    assert(
+      !document.querySelector('[data-user-tags-panel]') &&
+        !testState().users.some((user) => user.id === 'member/alice') &&
+        marks('author').querySelectorAll('.tag').length === 0 &&
+        marks('reply-author').querySelectorAll('.tag').length === 0,
+      'clear selection removes the user mark and all duplicate page badges',
+    );
+    const notice = testShadow(document.querySelector('[data-user-tags-notice]'));
+    assert(
+      notice.textContent.includes('已移除标记'),
+      'clear save reports removal instead of a validation error',
+    );
+    click(notice, '撤销');
+    await wait(180);
+    assert(
+      testState().users.some((user) => user.id === 'member/alice'),
+      'page clear remains undoable',
+    );
     document.getElementById('result').textContent = 'ALL PASS\n' + log.join('\n');
   } catch (error) {
     document.getElementById('result').textContent =

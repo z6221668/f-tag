@@ -172,6 +172,40 @@
       $('status').textContent.includes('不合法') && !testState().settings.rules.length,
       'rule editor reports selector errors',
     );
+    const beforeClear = testState();
+    $('users').querySelector('button').click();
+    const grade = $('edit-content').querySelector('select');
+    grade.value = 'clear';
+    grade.dispatchEvent(new Event('change', { bubbles: true }));
+    $('edit-content').querySelector('form').requestSubmit();
+    await wait(150);
+    assert(
+      !$('edit-dialog').open &&
+        !testState().users.length &&
+        testState().tags.length === beforeClear.tags.length &&
+        $('status').textContent.includes('已移除'),
+      'settings clear selection removes the user record while retaining the tag library',
+    );
+    $('undo').click();
+    await wait(100);
+    assert(
+      testState().users[0].note === beforeClear.users[0].note,
+      'settings undo restores the cleared note and labels',
+    );
+    $('users').querySelector('button').click();
+    const resumedGrade = $('edit-content').querySelector('select');
+    resumedGrade.value = 'clear';
+    resumedGrade.dispatchEvent(new Event('change', { bubbles: true }));
+    const resumedNote = $('edit-content').querySelector('textarea');
+    resumedNote.closest('details').open = true;
+    resumedNote.value = '清除后重新填写的备注';
+    resumedNote.dispatchEvent(new Event('input', { bubbles: true }));
+    $('edit-content').querySelector('form').requestSubmit();
+    await wait(100);
+    assert(
+      testState().users[0].note === '清除后重新填写的备注' && testState().users[0].levelId === null,
+      'new input after a clear selection resumes editing instead of discarding the note',
+    );
     report.textContent = 'ALL PASS\n' + results.join('\n');
   } catch (error) {
     report.textContent = 'FAILED ' + error.message + '\n' + results.join('\n');

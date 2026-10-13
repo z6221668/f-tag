@@ -94,7 +94,10 @@
       editor = null;
     };
     const finish = async (type, values) => {
-      await update({ type, ...values });
+      await update(
+        { type, ...values },
+        type === 'DELETE_USER' ? '已移除标记，可撤销' : '标记已保存',
+      );
       closeEditor();
     };
     editor = UserTagsEditor.mount($('edit-content'), {

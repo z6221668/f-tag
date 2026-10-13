@@ -118,6 +118,18 @@ test('undo tokens revert only the corresponding edit and cannot be reused', asyn
     /无法撤销/,
   );
 });
+test('clearing the final mark can be undone without losing the previous record', async () => {
+  const { repository } = setup();
+  const marked = await repository.dispatch({ type: 'SET_USER', user });
+  const cleared = await repository.dispatch({
+    type: 'SET_USER',
+    user: { ...user, levelId: null },
+    expectedRecord: C.recordToken(marked.state.users[0]),
+  });
+  assert.equal(cleared.state.users.length, 0);
+  const restored = await repository.dispatch({ type: 'UNDO_USER', token: cleared.undo.token });
+  assert.deepEqual(restored.state.users, marked.state.users);
+});
 test('deleting a tag saves a snapshot and invalidates old user undo references', async () => {
   const { repository, stored } = setup();
   const tags = await repository.dispatch({
