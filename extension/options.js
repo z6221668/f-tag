@@ -106,6 +106,10 @@
         await update({ type: 'SAVE_TAG', tag });
         return state;
       },
+      deleteTag: async (values) => {
+        await update({ type: 'DELETE_TAG', ...values });
+        return state;
+      },
     });
     $('edit-dialog').showModal();
     $('edit-close').focus();

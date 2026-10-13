@@ -108,6 +108,44 @@ test('content scripts cannot change settings, read recovery or write another sit
   );
 });
 
+test('page tag deletion requires a current confirmation and updates all records', async () => {
+  const w = worker();
+  const sender = { id: 'test-extension', tab: { id: 1 }, url: 'https://www.v2ex.com/t/1' };
+  const created = await w.send(
+    { type: 'SAVE_TAG', tag: { name: '页面新增', color: '#123456' } },
+    sender,
+  );
+  const id = created.state.tags[0].id;
+  await w.send({ type: 'SET_USER', user: { ...record(1), tagIds: [id] } }, sender);
+  const current = await w.send({
+    type: 'SET_USER',
+    user: { ...record(2), site: 'zhihu.com', tagIds: [id] },
+  });
+  assert.equal((await w.send({ type: 'DELETE_TAG', id }, sender)).ok, false);
+  const stale = await w.send(
+    { type: 'DELETE_TAG', id, expectedRevision: created.state.revision },
+    sender,
+  );
+  assert.equal(stale.ok, false);
+  assert.match(stale.error, /重新确认/);
+  assert.deepEqual(w.state(), structuredClone(current.state));
+  const deleted = await w.send(
+    { type: 'DELETE_TAG', id, expectedRevision: current.state.revision },
+    sender,
+  );
+  assert.equal(deleted.ok, true);
+  assert.equal(deleted.state.tags.length, 0);
+  assert.ok(deleted.state.users.every((user) => user.tagIds.length === 0));
+  const status = await w.send({ type: 'GET_STATUS' });
+  assert.equal(status.recovery.reason, 'delete-tag');
+  const restored = await w.send({
+    type: 'RESTORE_SNAPSHOT',
+    expectedRevision: deleted.state.revision,
+  });
+  assert.equal(restored.ok, true);
+  assert.ok(restored.state.users.every((user) => user.tagIds.includes(id)));
+});
+
 test('extension settings in a browser tab keep access to management actions', async () => {
   const w = worker();
   const sender = {

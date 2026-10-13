@@ -29,11 +29,12 @@
   }
   function mount(
     container,
-    { state: initialState, identity, defaultSource = '', save, remove, createTag },
+    { state: initialState, identity, defaultSource = '', save, remove, createTag, deleteTag },
   ) {
     let state = initialState;
     const original = Core.index(state).users.get(Core.userKey(identity.site, identity.id));
-    const expectedRecord = Core.recordToken(original);
+    let expectedUser = original;
+    let expectedRecord = Core.recordToken(expectedUser);
     const selected = new Set(original?.tagIds || []);
     const form = element('form', { class: 'user-editor' });
     const error = element('div', { class: 'error', role: 'status', 'aria-live': 'polite' });
@@ -53,6 +54,46 @@
     });
     source.value = original?.sourceUrl || defaultSource;
     const list = element('div', { class: 'list' });
+    const confirmation = element('div', { class: 'tag-confirmation', role: 'group' });
+    confirmation.hidden = true;
+    function confirmDeletion(tag) {
+      const expectedRevision = state.revision;
+      const cancel = element('button', {
+        type: 'button',
+        class: 'secondary',
+        text: '取消',
+        onclick: () => {
+          confirmation.hidden = true;
+        },
+      });
+      const confirm = element('button', {
+        type: 'button',
+        class: 'secondary',
+        text: '确认删除标签',
+        onclick: () =>
+          busy(async () => {
+            const next = await deleteTag({ id: tag.id, expectedRevision });
+            // Advance only the known deletion; unrelated concurrent edits must still conflict.
+            if (expectedUser)
+              expectedUser = {
+                ...expectedUser,
+                tagIds: expectedUser.tagIds.filter((id) => id !== tag.id),
+              };
+            expectedRecord = Core.recordToken(expectedUser);
+            confirmation.hidden = true;
+            error.textContent = '';
+            refresh(next);
+          }),
+      });
+      confirmation.replaceChildren(
+        element('div', {
+          text: '删除标签“' + tag.name + '”？所有用户上的此标签也会移除，删除前会保存恢复快照。',
+        }),
+        element('div', { class: 'row' }, [cancel, confirm]),
+      );
+      confirmation.hidden = false;
+      cancel.focus();
+    }
     const name = element('input', {
       type: 'text',
       maxlength: '30',
@@ -80,7 +121,20 @@
             onchange: () => (checkbox.checked ? selected.add(tag.id) : selected.delete(tag.id)),
           });
           checkbox.checked = selected.has(tag.id);
-          return element('label', {}, [checkbox, badge(tag)]);
+          const row = element('div', { class: 'tag-option' }, [
+            element('label', {}, [checkbox, badge(tag)]),
+          ]);
+          if (deleteTag)
+            row.append(
+              element('button', {
+                type: 'button',
+                class: 'secondary',
+                text: '删除标签',
+                'aria-label': '删除标签“' + tag.name + '”',
+                onclick: () => confirmDeletion(tag),
+              }),
+            );
+          return row;
         }),
       );
       if (!state.tags.length)
@@ -149,6 +203,8 @@
       field('等级', level),
       element('div', { class: 'field-label', text: '描述标签' }),
       list,
+      element('div', { class: 'sub', text: '取消勾选并保存，只移除当前用户的标签。' }),
+      confirmation,
       field('备注', note),
       field('来源链接', source),
       element('div', {

@@ -16,7 +16,14 @@ const repository = new UserTagsRepository.Repository(
   chrome.storage.local,
   chrome.runtime.getManifest().version,
 );
-const CONTENT_ACTIONS = new Set(['GET_STATE', 'SAVE_TAG', 'SET_USER', 'DELETE_USER', 'UNDO_USER']);
+const CONTENT_ACTIONS = new Set([
+  'GET_STATE',
+  'SAVE_TAG',
+  'DELETE_TAG',
+  'SET_USER',
+  'DELETE_USER',
+  'UNDO_USER',
+]);
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (sender.id !== chrome.runtime.id) return;
   if (!message || typeof message.type !== 'string') {
@@ -27,6 +34,10 @@ chrome.runtime.onMessage.addListener((message, sender, respond) => {
   if (sender.tab && !extensionPage) {
     if (!CONTENT_ACTIONS.has(message.type)) {
       respond({ ok: false, error: '请从插件设置中进行此操作' });
+      return;
+    }
+    if (message.type === 'DELETE_TAG' && !Number.isSafeInteger(message.expectedRevision)) {
+      respond({ ok: false, error: '请重新确认删除标签' });
       return;
     }
     if (['SET_USER', 'DELETE_USER'].includes(message.type)) {

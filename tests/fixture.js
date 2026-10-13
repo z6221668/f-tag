@@ -123,6 +123,100 @@
       'stale editor rejects overwrite',
     );
     panel().querySelector('.close').click();
+    marks('bob').querySelector('button').click();
+    click(panel(), '删除标签');
+    click(panel(), '取消');
+    assert(testState().tags.length === 1, 'cancelling tag deletion keeps the tag');
+    const checkbox = panel().querySelector('input[type=checkbox]');
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
+    click(panel(), '保存标记');
+    await wait(180);
+    assert(
+      testState().tags.length === 1 &&
+        testState().users.find((user) => user.id === 'member/bob').tagIds.length === 0,
+      'unchecking removes only the user assignment',
+    );
+    for (const id of ['author', 'bob']) {
+      marks(id).querySelector('button').click();
+      const choice = panel().querySelector('input[type=checkbox]');
+      choice.checked = true;
+      choice.dispatchEvent(new Event('change'));
+      click(panel(), '保存标记');
+      await wait(180);
+    }
+    marks('bob').querySelector('button').click();
+    click(panel(), '删除标签');
+    const newer = testState();
+    newer.levels[0].name = '确认期间改名';
+    await testSetState(newer);
+    click(panel(), '确认删除标签');
+    await wait(100);
+    assert(
+      testState().tags.length === 1 &&
+        panel().querySelector('.error').textContent.includes('重新确认'),
+      'stale deletion confirmation preserves the tag',
+    );
+    click(panel(), '删除标签');
+    panel().querySelector('textarea').value = '删除标签时保留未保存备注';
+    click(panel(), '确认删除标签');
+    await wait(180);
+    assert(
+      testState().tags.length === 0 && testState().users.every((user) => user.tagIds.length === 0),
+      'page deletion removes the definition and all assignments',
+    );
+    assert(
+      marks('author').querySelectorAll('.tag').length === 1 &&
+        marks('bob').querySelectorAll('.tag').length === 0,
+      'page badges update after global tag deletion and preserve levels',
+    );
+    click(panel(), '保存标记');
+    await wait(180);
+    assert(
+      !document.querySelector('[data-user-tags-panel]') &&
+        testState().users.find((user) => user.id === 'member/bob').note ===
+          '删除标签时保留未保存备注',
+      'editor saves pending fields after deleting an assigned tag without a false conflict',
+    );
+    const restored = await chrome.runtime.sendMessage({
+      type: 'RESTORE_SNAPSHOT',
+      expectedRevision: testState().revision,
+    });
+    await wait(180);
+    assert(
+      restored.ok &&
+        testState().tags.length === 1 &&
+        testState().users.every((user) => user.tagIds.length === 1),
+      'deletion snapshot restores the tag and its assignments',
+    );
+    marks('bob').querySelector('button').click();
+    panel().querySelector('input[type=text]').value = '临时新标签';
+    click(panel(), '创建并选中');
+    await wait(100);
+    panel().querySelector('[aria-label="删除标签“临时新标签”"]').click();
+    click(panel(), '确认删除标签');
+    await wait(180);
+    assert(
+      testState().tags.length === 1 &&
+        ![...panel().querySelectorAll('input[type=checkbox]')].some(
+          (input) => input.getAttribute('aria-label') === '临时新标签',
+        ),
+      'new tags can be deleted before saving a user mark',
+    );
+    const updatedUser = testState();
+    updatedUser.users.find((user) => user.id === 'member/bob').note = '删除之前的并发备注';
+    await testSetState(updatedUser);
+    click(panel(), '删除标签');
+    click(panel(), '确认删除标签');
+    await wait(180);
+    click(panel(), '保存标记');
+    await wait(100);
+    assert(
+      panel().querySelector('.error').textContent.includes('其他页面') &&
+        testState().users.find((user) => user.id === 'member/bob').note === '删除之前的并发备注',
+      'tag deletion does not suppress unrelated user edit conflicts',
+    );
+    panel().querySelector('.close').click();
     const before = document.querySelectorAll('[data-user-tags-host]').length;
     await wait(220);
     assert(

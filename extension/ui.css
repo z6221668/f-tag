@@ -370,6 +370,23 @@ dialog .toolbar {
   gap: 8px;
   align-items: center;
 }
+.user-editor .tag-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.user-editor .tag-option label {
+  min-width: 0;
+}
+.user-editor .tag-confirmation {
+  font-size: 13px;
+  padding: 10px;
+  border: 1px solid #ddd5e7;
+  border-radius: 7px;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
 .user-editor .tag {
   background: var(--color);
   color: var(--ink);

@@ -110,6 +110,23 @@ h2 {
   max-height: 220px;
   overflow: auto;
 }
+.tag-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tag-option label {
+  min-width: 0;
+}
+.tag-confirmation {
+  font-size: 13px;
+  padding: 10px;
+  border: 1px solid #ddd5e7;
+  border-radius: 7px;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
 label {
   display: flex;
   gap: 8px;
@@ -353,6 +370,11 @@ button:disabled {
       remove: (values) => finish('DELETE_USER', values),
       createTag: async (tag) => {
         const result = await request({ type: 'SAVE_TAG', tag });
+        refreshMarks();
+        return result.state;
+      },
+      deleteTag: async (values) => {
+        const result = await request({ type: 'DELETE_TAG', ...values });
         refreshMarks();
         return result.state;
       },

@@ -306,6 +306,10 @@
         break;
       }
       case 'DELETE_TAG':
+        if (message.expectedRevision !== undefined && message.expectedRevision !== state.revision)
+          throw new Error('数据已更新，请重新确认删除标签');
+        if (!next.tags.some((tag) => tag.id === message.id))
+          throw new Error('标签已被删除，请重新选择');
         next.tags = next.tags.filter((tag) => tag.id !== message.id);
         next.users = next.users.map((user) => ({
           ...user,
