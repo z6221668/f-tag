@@ -6,22 +6,57 @@
     <title>f-tag · 标签与记录</title>
     <link rel="stylesheet" href="ui.css" />
   </head>
-  <body>
+  <body class="settings-page">
     <main class="layout">
-      <div class="eyebrow">F-TAG</div>
-      <div class="header">
-        <img src="icons/48.png" alt="" class="logo" />
-        <h1>f-tag <span class="muted">/ 标签与记录</span></h1>
-      </div>
-      <p class="muted intro">按账号保存等级、标签和备注。所有记录存储在本机。</p>
+      <nav class="settings-nav" aria-label="管理导航">
+        <a href="#records">用户记录</a>
+        <a href="#tag-library">标签库</a>
+        <a href="#backups">本地备份</a>
+        <a href="#site-settings">站点设置</a>
+      </nav>
+      <header class="masthead">
+        <div class="brand-copy">
+          <p class="brand-caption">浏览器用户标记</p>
+          <h1>f-tag<span>.</span></h1>
+          <p class="brand-line">记住账号，少费口舌。</p>
+        </div>
+        <img src="icons/128.png" alt="f-tag 熊猫图标" class="brand-art" />
+      </header>
+      <p class="intro">等级、标签、备注。记在本机，留给下次。</p>
       <div id="status" class="status" role="status" aria-live="polite"></div>
       <div class="grid">
-        <section class="card">
+        <section class="card wide" id="records">
+          <h2>已标记用户 <span id="user-count" class="muted"></span></h2>
+          <p class="muted">按站点和账号分别记录。同名不会合并，未适配站点的记录也会保留。</p>
+          <div class="row">
+            <input
+              id="search"
+              type="search"
+              placeholder="搜索昵称、账号、站点、等级、标签或备注"
+              aria-label="搜索用户"
+            />
+          </div>
+          <div class="table-scroll" role="region" aria-label="用户记录表格" tabindex="0">
+            <table>
+              <thead>
+                <tr>
+                  <th>用户 / 账号</th>
+                  <th>站点</th>
+                  <th>等级 / 标签 / 备注</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="users"></tbody>
+            </table>
+          </div>
+          <div id="empty" class="empty" hidden>还没记下谁。在网页用户名旁点 Tag，先记一笔。</div>
+        </section>
+        <section class="card" id="tag-library">
           <h2>用户等级</h2>
           <p class="muted">一个用户最多设置一个等级。名称与颜色可以修改。</p>
           <div id="levels"></div>
-          <h2>描述标签</h2>
-          <p class="muted">描述标签可多选，与等级分别保存。</p>
+          <h2>标签库</h2>
+          <p class="muted">所有用户共用。新建后可在页面中选用，删除会从所有用户的标记中移除。</p>
           <form id="tag-form">
             <div class="row">
               <input
@@ -42,7 +77,7 @@
           </form>
           <div id="tags" class="stack"></div>
         </section>
-        <section class="card">
+        <section class="card" id="backups">
           <h2>本地备份</h2>
           <p class="muted">JSON 文件包含等级、标签、备注和站点设置。导入前自动保存本地恢复快照。</p>
           <div class="toolbar note">
@@ -60,7 +95,7 @@
             ><button id="undo" disabled>撤销上次标记</button>
           </div>
         </section>
-        <section class="card">
+        <section class="card" id="site-settings">
           <h2>站点白名单</h2>
           <p class="muted">以下域名及其子域名免于检查，已有记录仍会保留。</p>
           <label class="switch note"><input id="enabled" type="checkbox" />启用插件</label>
@@ -96,45 +131,16 @@
             ><button id="rules-save" class="note">保存规则</button>
           </details>
         </section>
-        <section class="card wide">
-          <h2>已标记用户 <span id="user-count" class="muted"></span></h2>
-          <p class="muted">
-            按站点和账号标识分别保存。内置站点的 www
-            和主域名使用同一账号记录，同名用户不会合并。暂未适配的站点记录同样保留。
-          </p>
-          <div class="row">
-            <input
-              id="search"
-              type="search"
-              placeholder="搜索昵称、账号、站点、等级、标签或备注"
-              aria-label="搜索用户"
-            />
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>用户 / 账号</th>
-                <th>站点</th>
-                <th>等级 / 标签 / 备注</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="users"></tbody>
-          </table>
-          <div id="empty" class="empty" hidden>
-            暂无匹配记录。在网页用户名旁点击 Tag，即可开始标记。
-          </div>
-        </section>
       </div>
-      <p class="footer">f-tag · 无账号，无云端同步，无遥测。请定期导出备份。</p>
+      <p class="footer">数据留在本机。换浏览器前，记得导出备份。</p>
     </main>
-    <dialog id="confirm-dialog">
+    <dialog id="confirm-dialog" aria-labelledby="confirm-text">
       <p id="confirm-text"></p>
       <div class="toolbar">
         <button id="confirm-no">取消</button><button id="confirm-yes" class="primary">确认</button>
       </div>
     </dialog>
-    <dialog id="edit-dialog">
+    <dialog id="edit-dialog" aria-labelledby="edit-title">
       <h2 id="edit-title"></h2>
       <button id="edit-close" type="button">关闭</button>
       <div id="edit-content"></div>

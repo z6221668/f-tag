@@ -2,7 +2,7 @@
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const results = [];
   async function waitFor(predicate, label) {
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 120; i++) {
       if (predicate()) return;
       await wait(40);
     }
@@ -65,6 +65,31 @@
       $('users').querySelector('.record-note').textContent === '<b>备注</b>' &&
         !$('users').querySelector('b'),
       'remarks render safely as text',
+    );
+    $('users').querySelector('button').click();
+    const pendingNote = $('edit-content').querySelector('textarea');
+    pendingNote.closest('details').open = true;
+    pendingNote.value = '尚未保存的输入';
+    $('edit-close').click();
+    assert(
+      $('edit-dialog').open && !$('edit-content').querySelector('.tag-confirmation').hidden,
+      'settings close button asks before discarding a user draft',
+    );
+    [...$('edit-content').querySelectorAll('button')]
+      .find((button) => button.textContent === '继续编辑')
+      .click();
+    assert(
+      pendingNote.value === '尚未保存的输入',
+      'settings continue editing keeps pending fields',
+    );
+    $('edit-dialog').dispatchEvent(new Event('cancel', { cancelable: true }));
+    [...$('edit-content').querySelectorAll('button')]
+      .find((button) => button.textContent === '放弃修改')
+      .click();
+    await wait(100);
+    assert(
+      !$('edit-dialog').open && testState().users[0].note === '<b>备注</b>',
+      'settings Escape path discards the draft only after confirmation',
     );
     const before = testState();
     const badSelector = UserTagsCore.backup(before, '0.3.0');

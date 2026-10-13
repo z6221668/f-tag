@@ -185,6 +185,9 @@
       $('users').append(row);
     }
     $('empty').hidden = users.length > 0;
+    $('empty').textContent = state.users.length
+      ? '没有匹配的记录，换个关键词试试。'
+      : '还没记下谁。在网页用户名旁点 Tag，先记一笔。';
     $('user-count').textContent = `${state.users.length} 位`;
   }
   function renderRecovery() {
@@ -378,8 +381,11 @@
     }),
   );
   $('edit-close').addEventListener('click', () => {
-    $('edit-dialog').close();
-    editor = null;
+    editor?.requestClose(() => $('edit-dialog').close());
+  });
+  $('edit-dialog').addEventListener('cancel', (event) => {
+    event.preventDefault();
+    editor?.requestClose(() => $('edit-dialog').close());
   });
   $('edit-dialog').addEventListener('close', () => {
     editor = null;

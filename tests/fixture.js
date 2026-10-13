@@ -8,8 +8,10 @@
   const host = (id) => document.getElementById(id).nextElementSibling;
   const marks = (id) => testShadow(host(id));
   const panel = () => testShadow(document.querySelector('[data-user-tags-panel]'));
-  const click = (root, text) =>
+  const click = (root, text) => {
+    if (text === '管理标签库') root.querySelector('.metadata').open = true;
     [...root.querySelectorAll('button')].find((node) => node.textContent === text).click();
+  };
   try {
     await wait(240);
     assert(
@@ -51,6 +53,7 @@
       'dynamic replies inherit marks',
     );
     marks('bob').querySelector('button').click();
+    panel().querySelector('.create').open = true;
     panel().querySelector('input[type=text]').value = '<b>自定义</b>';
     click(panel(), '创建并选中');
     await wait(80);
@@ -124,6 +127,7 @@
     );
     panel().querySelector('.close').click();
     marks('bob').querySelector('button').click();
+    click(panel(), '管理标签库');
     click(panel(), '删除标签');
     click(panel(), '取消');
     assert(testState().tags.length === 1, 'cancelling tag deletion keeps the tag');
@@ -146,6 +150,7 @@
       await wait(180);
     }
     marks('bob').querySelector('button').click();
+    click(panel(), '管理标签库');
     click(panel(), '删除标签');
     const newer = testState();
     newer.levels[0].name = '确认期间改名';
@@ -190,9 +195,11 @@
       'deletion snapshot restores the tag and its assignments',
     );
     marks('bob').querySelector('button').click();
+    panel().querySelector('.create').open = true;
     panel().querySelector('input[type=text]').value = '临时新标签';
     click(panel(), '创建并选中');
     await wait(100);
+    click(panel(), '管理标签库');
     panel().querySelector('[aria-label="删除标签“临时新标签”"]').click();
     click(panel(), '确认删除标签');
     await wait(180);
@@ -217,6 +224,25 @@
       'tag deletion does not suppress unrelated user edit conflicts',
     );
     panel().querySelector('.close').click();
+    marks('author').querySelector('button').click();
+    panel().querySelector('select').value = 'level-3';
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    assert(
+      Boolean(panel()) && !panel().querySelector('.tag-confirmation').hidden,
+      'outside click protects pending user choices',
+    );
+    click(panel(), '继续编辑');
+    assert(
+      panel().querySelector('select').value === 'level-3',
+      'continuing retains the chosen level',
+    );
+    panel().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    click(panel(), '放弃修改');
+    await wait(100);
+    assert(
+      !document.querySelector('[data-user-tags-panel]'),
+      'Escape closes only after discarding pending changes',
+    );
     const before = document.querySelectorAll('[data-user-tags-host]').length;
     await wait(220);
     assert(

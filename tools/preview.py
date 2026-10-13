@@ -17,6 +17,8 @@ class Preview(SimpleHTTPRequestHandler):
             html = html.replace('<script src="client.js">', '<script src="/extension/repository.js"></script><script src="/tests/mock-chrome.js"></script><script src="client.js">')
             if name == 'options' and parse_qs(urlsplit(self.path).query).get('test') == ['1']:
                 html = html.replace('</body>', '<script src="/tests/options-fixture.js"></script></body>')
+            elif name == 'options' and parse_qs(urlsplit(self.path).query).get('demo') == ['1']:
+                html = html.replace('</body>', '<script src="/tests/settings-preview.js"></script></body>')
             content = html.encode()
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')

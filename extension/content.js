@@ -70,19 +70,22 @@ button {
 }
 .panel {
   position: fixed;
-  width: 360px;
+  width: 330px;
   max-width: calc(100vw - 24px);
   max-height: calc(100vh - 24px);
   overflow: auto;
   background: #fff;
   color: #262332;
-  border: 1px solid #e4dfee;
-  border-radius: 16px;
+  border: 1px solid #c6c3b7;
+  border-radius: 9px;
   box-shadow: 0 12px 60px #21143e30;
-  padding: 20px;
+  padding: 16px;
   font-size: 13px;
   line-height: 1.6;
+  animation: panel-enter 140ms ease-out;
 }
+@keyframes panel-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
 h2 {
   font-size: 17px;
   margin: 0 24px 2px 0;
@@ -103,69 +106,6 @@ h2 {
   font-size: 20px;
   color: #827b8c;
 }
-.list {
-  display: grid;
-  gap: 8px;
-  margin: 12px 0;
-  max-height: 220px;
-  overflow: auto;
-}
-.tag-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.tag-option label {
-  min-width: 0;
-}
-.tag-confirmation {
-  font-size: 13px;
-  padding: 10px;
-  border: 1px solid #ddd5e7;
-  border-radius: 7px;
-  margin-top: 12px;
-  overflow-wrap: anywhere;
-}
-label {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-input[type="checkbox"] {
-  accent-color: #7652bf;
-}
-.empty {
-  color: #827b8c;
-  margin: 12px 0;
-}
-.create {
-  border-top: 1px solid #ede8f3;
-  padding-top: 12px;
-  margin-top: 16px;
-}
-.row {
-  display: flex;
-  gap: 8px;
-  margin: 8px 0;
-}
-input[type="text"] {
-  min-width: 0;
-  flex: 1;
-  border: 1px solid #ddd5e7;
-  border-radius: 7px;
-  padding: 8px;
-  color: #262332;
-  background: #fff;
-}
-input[type="color"] {
-  width: 38px;
-  height: 36px;
-  border: 1px solid #ddd5e7;
-  border-radius: 7px;
-  background: white;
-  padding: 3px;
-}
 .primary,
 .secondary {
   border: 0;
@@ -180,28 +120,6 @@ input[type="color"] {
 .secondary {
   background: #f2edf9;
   color: #6242a0;
-}
-.field {
-  display: grid;
-  gap: 5px;
-  margin: 10px 0;
-}
-.field-label {
-  margin-top: 12px;
-}
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  border: 1px solid #ddd5e7;
-  border-radius: 7px;
-  padding: 8px;
-  color: #262332;
-  background: #fff;
-}
-.field textarea {
-  resize: vertical;
-  min-height: 70px;
 }
 .notice {
   position: fixed;
@@ -222,20 +140,6 @@ input[type="color"] {
 .notice .close {
   right: 8px;
   top: 4px;
-}
-.actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-}
-.actions .primary {
-  flex: 1;
-}
-.error {
-  color: #b03151;
-  font-size: 12px;
-  min-height: 18px;
-  margin-top: 8px;
 }
 button:disabled {
   opacity: 0.5;
@@ -300,6 +204,7 @@ button:disabled {
   }
   function close() {
     if (!panel) return;
+    panel.resize?.disconnect();
     const trigger = panel.entry.shadow.querySelector('.trigger');
     panel.host.remove();
     panel = null;
@@ -334,7 +239,13 @@ button:disabled {
     for (const entry of entries.values()) draw(entry);
   }
   function openPanel(entry, trigger) {
-    close();
+    if (panel) {
+      panel.editor.requestClose(() => {
+        close();
+        openPanel(entry, trigger);
+      });
+      return;
+    }
     const host = el('span', { 'data-user-tags-panel': '' });
     host.style.setProperty('position', 'fixed', 'important');
     host.style.setProperty('z-index', '2147483647', 'important');
@@ -351,10 +262,14 @@ button:disabled {
         type: 'button',
         text: '×',
         'aria-label': '关闭',
-        onclick: close,
+        onclick: () => editor.requestClose(close),
       }),
       el('h2', { text: entry.user.name }),
-      el('div', { class: 'sub', text: entry.user.site + ' · ' + entry.user.id }),
+      el('div', {
+        class: 'sub',
+        text: entry.user.site,
+        title: entry.user.site + ' · ' + entry.user.id,
+      }),
     );
     const finish = async (type, values) => {
       const result = await request({ type, ...values });
@@ -382,18 +297,28 @@ button:disabled {
     shadow.append(el('style', { text: style }), box);
     document.documentElement.append(host);
     panel = { host, trigger, entry, editor };
-    const rect = entry.host.getBoundingClientRect();
-    box.style.left = Math.max(12, Math.min(rect.left, innerWidth - box.offsetWidth - 12)) + 'px';
-    box.style.top =
-      Math.max(12, Math.min(rect.bottom + 8, innerHeight - box.offsetHeight - 12)) + 'px';
+    const position = () => {
+      const rect = entry.host.getBoundingClientRect();
+      box.style.left = Math.max(12, Math.min(rect.left, innerWidth - box.offsetWidth - 12)) + 'px';
+      box.style.top =
+        Math.max(12, Math.min(rect.bottom + 8, innerHeight - box.offsetHeight - 12)) + 'px';
+    };
+    panel.resize = new ResizeObserver(position);
+    panel.resize.observe(box);
+    position();
     shadow.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        close();
+        event.stopPropagation();
+        editor.requestClose(close);
       }
       if (event.key !== 'Tab') return;
-      const focusables = [...box.querySelectorAll('button,input,select,textarea')].filter(
-        (n) => !n.disabled,
+      const focusables = [...box.querySelectorAll('button,input,select,textarea,summary')].filter(
+        (n) =>
+          !n.disabled &&
+          !n.closest('[hidden]') &&
+          (!n.closest('details:not([open])') || n.tagName === 'SUMMARY') &&
+          n.getClientRects().length > 0,
       );
       const first = focusables[0],
         last = focusables.at(-1);
@@ -405,7 +330,7 @@ button:disabled {
         first.focus();
       }
     });
-    box.querySelector('button').focus();
+    box.querySelector('select').focus();
   }
   document.addEventListener(
     'pointerdown',
@@ -415,7 +340,7 @@ button:disabled {
         !event.composedPath().includes(panel.host) &&
         !event.composedPath().includes(panel.trigger)
       )
-        close();
+        panel.editor.requestClose(close);
     },
     true,
   );

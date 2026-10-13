@@ -9,7 +9,7 @@
   background: #f7f5fa;
   color-scheme: light;
   --accent: #7652bf;
-  --muted: #827b8c;
+  --muted: #716879;
 }
 * {
   box-sizing: border-box;
@@ -103,12 +103,6 @@ h2 {
   font-size: 13px;
   line-height: 1.7;
 }
-.eyebrow {
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  color: var(--accent);
-  margin-bottom: 9px;
-}
 .logo {
   width: 42px;
   height: 42px;
@@ -120,13 +114,15 @@ h2 {
   gap: 14px;
 }
 .layout {
-  max-width: 1060px;
-  margin: 48px auto;
+  max-width: 1120px;
+  margin: 28px auto;
   padding: 0 24px;
 }
 .intro {
-  margin-top: 10px;
-  max-width: 620px;
+  padding: 12px 0;
+  font-size: 13px;
+  border-top: 1px solid #b6b2a7;
+  border-bottom: 1px solid #b6b2a7;
 }
 .toolbar {
   display: flex;
@@ -137,20 +133,59 @@ h2 {
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 26px;
+  gap: 28px 36px;
+  margin-top: 32px;
+}
+.settings-nav {
+  display: flex;
+  flex-wrap: wrap;
+  background: #191b15;
+  border: 2px solid #191b15;
+}
+.settings-nav a {
+  font-size: 12px;
+  font-weight: 650;
+  color: #fbf9f1;
+  padding: 11px 18px;
+  text-decoration: none;
+  border-right: 1px solid #585a50;
+  transition:
+    background 140ms,
+    color 140ms;
+}
+.settings-nav a:hover {
+  background: #dbfa57;
+  color: #191b15;
+}
+.settings-nav a:focus-visible {
+  outline: 2px solid #dbfa57;
+  outline-offset: -4px;
 }
 .card {
-  border: 1px solid #e7e1ed;
-  border-radius: 16px;
-  background: white;
-  padding: 24px;
+  scroll-margin-top: 20px;
+  min-width: 0;
+}
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.card {
+  border-top: 3px solid #191b15;
+  padding: 18px 0 0;
 }
 .wide {
   grid-column: 1/-1;
 }
 .card h2 {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  font-size: 23px;
+  font-weight: 850;
+  letter-spacing: -0.7px;
+}
+#tag-library h2:not(:first-child) {
+  border-top: 1px dashed #b6b2a7;
+  margin-top: 28px;
+  padding-top: 20px;
 }
 .row {
   display: flex;
@@ -323,7 +358,7 @@ dialog .toolbar {
     grid-template-columns: 1fr;
   }
   .card {
-    padding: 18px;
+    padding: 16px 0 0;
   }
   table {
     font-size: 12px;
@@ -340,81 +375,6 @@ dialog .toolbar {
   }
 }
 
-.field {
-  display: grid;
-  gap: 6px;
-  margin: 14px 0;
-  font-size: 13px;
-}
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  border: 1px solid #ddd5e7;
-  border-radius: 8px;
-  padding: 9px;
-  background: #fff;
-  color: #262332;
-}
-.field-label {
-  font-size: 13px;
-  margin-top: 14px;
-}
-.user-editor .list {
-  display: grid;
-  gap: 8px;
-  margin: 12px 0;
-}
-.user-editor .list label {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.user-editor .tag-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.user-editor .tag-option label {
-  min-width: 0;
-}
-.user-editor .tag-confirmation {
-  font-size: 13px;
-  padding: 10px;
-  border: 1px solid #ddd5e7;
-  border-radius: 7px;
-  margin-top: 12px;
-  overflow-wrap: anywhere;
-}
-.user-editor .tag {
-  background: var(--color);
-  color: var(--ink);
-  border-radius: 5px;
-  padding: 2px 7px;
-  font-size: 11px;
-}
-.user-editor .actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 20px;
-}
-.user-editor .create {
-  border-top: 1px solid #eee8f4;
-  padding-top: 14px;
-  margin-top: 18px;
-}
-.user-editor .sub {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 12px;
-}
-.user-editor .error {
-  font-size: 13px;
-  color: #b03151;
-  margin-top: 12px;
-  min-height: 20px;
-}
 .record-note {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -443,6 +403,217 @@ td a {
 #edit-title {
   padding-right: 60px;
   overflow-wrap: anywhere;
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-nav a {
+    transition: none;
+  }
+}
+
+/* The settings page uses a paper-and-ink theme; the compact browser popup stays separate. */
+.settings-page {
+  --accent: #191b15;
+  --muted: #66665a;
+  color: #191b15;
+  background: #f4f1e7;
+  display: flow-root;
+  min-height: 100vh;
+  font-family:
+    'Outfit',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 5px,
+    #191b1503 5px,
+    #191b1503 6px
+  );
+}
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  padding: 38px 8px 28px 0;
+}
+.brand-copy {
+  min-width: 0;
+}
+.brand-caption {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 1px;
+}
+.masthead h1 {
+  font-size: clamp(80px, 10vw, 138px);
+  line-height: 0.96;
+  font-weight: 900;
+  letter-spacing: -9px;
+  margin: 12px 0 20px;
+  white-space: nowrap;
+}
+.masthead h1 span {
+  color: #86951d;
+}
+.brand-line {
+  font-size: clamp(17px, 2.2vw, 25px);
+  font-weight: 750;
+  letter-spacing: -0.5px;
+  width: fit-content;
+  background: linear-gradient(transparent 58%, #dbfa57 58%);
+  transform: rotate(-1deg);
+}
+.brand-art {
+  width: 164px;
+  height: 164px;
+  object-fit: contain;
+  background: #fff;
+  border: 2px solid #191b15;
+  box-shadow:
+    7px 7px 0 #dbfa57,
+    9px 9px 0 #191b15;
+  transform: rotate(5deg);
+  transition: transform 180ms ease-out;
+  flex-shrink: 0;
+}
+.brand-art:hover {
+  transform: rotate(-3deg);
+}
+.settings-page button {
+  border: 1px solid #191b15;
+  border-radius: 2px;
+  background: #fffdf7;
+  color: #191b15;
+  transition:
+    transform 120ms,
+    box-shadow 120ms,
+    background 120ms;
+}
+.settings-page button:not(:disabled):hover {
+  background: #dbfa57;
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 #191b15;
+}
+.settings-page .primary {
+  background: #191b15;
+  color: #fffdf7;
+}
+.settings-page .primary:not(:disabled):hover {
+  background: #dbfa57;
+  color: #191b15;
+}
+.settings-page .danger {
+  color: #a12f36;
+  border-color: #bda59e;
+}
+.settings-page :is(input[type='text'], input[type='search'], textarea) {
+  border-color: #b6b2a7;
+  border-radius: 2px;
+  background: #fffdf7;
+  color: #191b15;
+}
+.settings-page input[type='color'] {
+  border-color: #b6b2a7;
+  border-radius: 2px;
+}
+.settings-page :is(button, input, textarea, select, summary):focus-visible {
+  outline: 2px solid #191b15;
+  outline-offset: 3px;
+}
+.settings-page .item {
+  border-color: #c8c3b6;
+  border-top-style: dashed;
+}
+.settings-page .status {
+  background: #e8efcd;
+  padding: 10px 12px;
+  border-left: 3px solid #191b15;
+  color: #191b15;
+}
+.settings-page .status.error {
+  background: #f5e0dd;
+  border-left-color: #a12f36;
+}
+.settings-page .status:empty {
+  display: none;
+}
+.settings-page th {
+  background: #e1ecb1;
+  border-top: 1px solid #191b15;
+  border-bottom: 1px solid #191b15;
+  color: #34362c;
+  font-size: 12px;
+  padding: 12px;
+}
+.settings-page td {
+  border-color: #c8c3b6;
+  padding: 16px 12px;
+}
+.settings-page tbody tr:hover {
+  background: #ffffff60;
+}
+.settings-page #records .empty {
+  border: 1px dashed #b6b2a7;
+  padding: 24px 18px;
+  margin-top: 16px;
+  color: #66665a;
+}
+.settings-page .footer {
+  border-top: 3px solid #191b15;
+  padding-top: 16px;
+  margin-top: 36px;
+}
+.settings-page dialog {
+  background: #fffdf7;
+  border: 2px solid #191b15;
+  border-radius: 3px;
+  box-shadow: 8px 8px 0 #191b1530;
+}
+#edit-dialog .user-editor {
+  --editor-accent: #191b15;
+  --editor-muted: #66665a;
+}
+@media (max-width: 600px) {
+  .masthead {
+    gap: 14px;
+    padding: 30px 6px 24px 0;
+  }
+  .masthead h1 {
+    font-size: 74px;
+    letter-spacing: -5px;
+  }
+  .brand-art {
+    width: 86px;
+    height: 86px;
+    box-shadow:
+      4px 4px 0 #dbfa57,
+      6px 6px 0 #191b15;
+  }
+  .brand-caption {
+    font-size: 11px;
+  }
+  .brand-line {
+    font-size: 15px;
+  }
+  .settings-nav a {
+    flex: 1;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .settings-page td {
+    padding: 12px 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-page button,
+  .brand-art {
+    transition: none;
+  }
 }
 .footer {
   line-height: 1.6;

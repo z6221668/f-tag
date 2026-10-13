@@ -24,11 +24,11 @@ class Result(HTMLParser):
         if self.inside:
             self.text += data
 
-paths = ['/tests/fixture.html', '/tests/fixture.html?restore=1', '/preview/options?test=1', '/tests/stress-fixture.html']
+paths = ['/tests/fixture.html', '/tests/fixture.html?restore=1', '/preview/options?test=1', '/tests/stress-fixture.html', '/tests/editor-fixture.html', '/tests/editor-fixture.html?narrow=1']
 paths += ['/tests/site-fixture.html?site=' + site for site in ['nodeseek.com', 'linux.do', 'chiphell.com', '52pojie.cn', 'hostloc.com']]
 
 def run(path):
-    result = subprocess.run([args.browser, '--disable-gpu', '--no-sandbox', '--dump-dom', '--virtual-time-budget=8000', args.origin + path], capture_output=True, text=True, timeout=30)
+    result = subprocess.run([args.browser, '--disable-gpu', '--no-sandbox', '--dump-dom', '--virtual-time-budget=15000', args.origin + path], capture_output=True, text=True, timeout=30)
     parsed = Result()
     parsed.feed(result.stdout)
     passed = result.returncode == 0 and parsed.text.startswith('ALL PASS')

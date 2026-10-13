@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>f-tag · 编辑器交互测试</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 28px;
+        background: #f7f5fa;
+        color: #292333;
+        font-family: system-ui;
+      }
+      .preview-card {
+        box-sizing: border-box;
+        width: 330px;
+        max-width: 100%;
+        max-height: 650px;
+        overflow: auto;
+        padding: 16px;
+        border: 1px solid #e4dfee;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 12px 40px #21143e15;
+      }
+      .preview-card h2 {
+        font-size: 18px;
+        margin: 0 0 4px;
+      }
+      .account {
+        color: #716879;
+        font-size: 12px;
+        margin-bottom: 14px;
+      }
+      #result {
+        white-space: pre-wrap;
+        font-size: 12px;
+      }
+      body.narrow {
+        padding: 12px;
+      }
+      body.narrow .preview-card {
+        width: 296px;
+        max-height: 420px;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="preview-card">
+      <h2>Alice</h2>
+      <div class="account">v2ex.com</div>
+      <div id="editor"></div>
+    </section>
+    <pre id="result">RUNNING</pre>
+    <script src="../extension/core.js"></script>
+    <script src="../extension/repository.js"></script>
+    <script src="mock-chrome.js"></script>
+    <script src="../extension/editor.js"></script>
+    <script src="editor-fixture.js"></script>
+  </body>
+</html>

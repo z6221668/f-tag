@@ -205,6 +205,14 @@ try {
       'level-3',
       context,
     );
+    const metadata = dom.find(
+      (node) => node.nodeName === 'DETAILS' && attributes(node).class === 'metadata',
+    );
+    await click(
+      dom.find((node) => node.nodeName === 'SUMMARY' && node.parentId === metadata.nodeId),
+    );
+    await wait(100);
+    dom = await nodes();
     await setValue(
       dom.find((node) => node.nodeName === 'TEXTAREA'),
       'native page editor',
