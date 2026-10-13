@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>f-tag · 标签与记录</title>
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <div class="eyebrow">F-TAG</div>
+      <div class="header">
+        <img src="icons/48.png" alt="" class="logo" />
+        <h1>f-tag <span class="muted">/ 标签与记录</span></h1>
+      </div>
+      <p class="muted intro">按账号保存等级、标签和备注。所有记录存储在本机。</p>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div class="grid">
+        <section class="card">
+          <h2>用户等级</h2>
+          <p class="muted">一个用户最多设置一个等级。名称与颜色可以修改。</p>
+          <div id="levels"></div>
+          <h2>描述标签</h2>
+          <p class="muted">描述标签可多选，与等级分别保存。</p>
+          <form id="tag-form">
+            <div class="row">
+              <input
+                id="tag-name"
+                type="text"
+                maxlength="30"
+                placeholder="标签名称"
+                aria-label="标签名称"
+                required
+              /><input id="tag-color" type="color" value="#8b6bc6" aria-label="标签颜色" /><button
+                class="primary"
+                id="tag-save"
+                type="submit"
+              >
+                新增</button
+              ><button id="tag-cancel" type="button" hidden>取消</button>
+            </div>
+          </form>
+          <div id="tags" class="stack"></div>
+        </section>
+        <section class="card">
+          <h2>本地备份</h2>
+          <p class="muted">JSON 文件包含等级、标签、备注和站点设置。导入前自动保存本地恢复快照。</p>
+          <div class="toolbar note">
+            <button id="export" class="primary">导出备份</button
+            ><button id="import">导入备份</button
+            ><input id="import-file" type="file" accept=".json,application/json" hidden />
+          </div>
+          <p class="muted">
+            旧版本备份可导入新版；更高版本的备份会被拒绝，并提示升级。未适配站点的记录也会保留。
+          </p>
+          <p id="version" class="muted note"></p>
+          <p id="recovery-info" class="muted note"></p>
+          <div class="toolbar">
+            <button id="restore" disabled>恢复快照</button
+            ><button id="undo" disabled>撤销上次标记</button>
+          </div>
+        </section>
+        <section class="card">
+          <h2>站点白名单</h2>
+          <p class="muted">以下域名及其子域名免于检查，已有记录仍会保留。</p>
+          <label class="switch note"><input id="enabled" type="checkbox" />启用插件</label>
+          <form id="exclude-form" class="row">
+            <input
+              id="exclude-host"
+              type="text"
+              placeholder="example.com"
+              aria-label="白名单域名"
+              required
+            /><button type="submit">添加</button>
+          </form>
+          <div id="exclusions" class="stack"></div>
+        </section>
+        <section class="card">
+          <h2>站点适配</h2>
+          <p class="muted">
+            内置知乎、V2EX、NodeSeek、LINUX DO、Chiphell、吾爱破解、Hostloc。其他站点默认识别
+            /member/、/users/、/user/、/u/ 账号链接；可添加自定义规则。
+          </p>
+          <details class="note">
+            <summary>自定义规则（JSON）</summary>
+            <p class="muted note">
+              selector 选择用户名链接，prefix
+              是账号路径前缀。每个域名一条规则。修改路径前缀可能改变用户标识。
+            </p>
+            <textarea
+              id="rules"
+              aria-label="自定义站点规则"
+              spellcheck="false"
+              placeholder='[{"host":"forum.example.com","selector":"a.username","prefix":"/profile/"}]'
+            ></textarea
+            ><button id="rules-save" class="note">保存规则</button>
+          </details>
+        </section>
+        <section class="card wide">
+          <h2>已标记用户 <span id="user-count" class="muted"></span></h2>
+          <p class="muted">
+            按站点和账号标识分别保存。内置站点的 www
+            和主域名使用同一账号记录，同名用户不会合并。暂未适配的站点记录同样保留。
+          </p>
+          <div class="row">
+            <input
+              id="search"
+              type="search"
+              placeholder="搜索昵称、账号、站点、等级、标签或备注"
+              aria-label="搜索用户"
+            />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>用户 / 账号</th>
+                <th>站点</th>
+                <th>等级 / 标签 / 备注</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="users"></tbody>
+          </table>
+          <div id="empty" class="empty" hidden>
+            暂无匹配记录。在网页用户名旁点击 Tag，即可开始标记。
+          </div>
+        </section>
+      </div>
+      <p class="footer">f-tag · 无账号，无云端同步，无遥测。请定期导出备份。</p>
+    </main>
+    <dialog id="confirm-dialog">
+      <p id="confirm-text"></p>
+      <div class="toolbar">
+        <button id="confirm-no">取消</button><button id="confirm-yes" class="primary">确认</button>
+      </div>
+    </dialog>
+    <dialog id="edit-dialog">
+      <h2 id="edit-title"></h2>
+      <button id="edit-close" type="button">关闭</button>
+      <div id="edit-content"></div>
+    </dialog>
+    <script src="core.js"></script>
+    <script src="editor.js"></script>
+    <script src="client.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

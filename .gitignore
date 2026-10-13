@@ -1,0 +1,10 @@
+dist/
+node_modules/
+.DS_Store
+coverage/
+*.log
+__pycache__/
+*.pyc
+
+# Personal exports are not source files.
+f-tag-*-????-??-??.json

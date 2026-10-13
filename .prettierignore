@@ -1,0 +1,5 @@
+dist/
+node_modules/
+assets/
+docs/images/
+__pycache__/

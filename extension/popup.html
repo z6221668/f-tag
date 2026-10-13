@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>f-tag</title>
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body class="popup">
+    <div class="header">
+      <img src="icons/48.png" alt="" class="logo" />
+      <div>
+        <h1>f-tag</h1>
+        <p class="muted">本地用户标记</p>
+      </div>
+    </div>
+    <p id="site" class="site">正在读取当前站点…</p>
+    <p id="support" class="muted"></p>
+    <label class="switch"><input id="enabled" type="checkbox" disabled />启用用户标签</label>
+    <label class="switch"
+      ><input id="excluded" type="checkbox" disabled />当前站点加入白名单（免于检查）</label
+    >
+    <div class="toolbar"><button id="options" class="primary">标签与记录</button></div>
+    <div id="count" class="count"></div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <script src="core.js"></script>
+    <script src="adapters.js"></script>
+    <script src="adapters/zhihu.js"></script>
+    <script src="adapters/v2ex.js"></script>
+    <script src="adapters/nodeseek.js"></script>
+    <script src="adapters/linuxdo.js"></script>
+    <script src="adapters/discuz.js"></script>
+    <script src="adapters/chiphell.js"></script>
+    <script src="adapters/52pojie.js"></script>
+    <script src="adapters/hostloc.js"></script>
+    <script src="adapters/generic.js"></script>
+    <script src="client.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

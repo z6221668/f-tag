@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>f-tag browser fixture</title>
+    <style>
+      body {
+        font-family: system-ui;
+        background: #f7f5fa;
+        color: #262332;
+        margin: 60px auto;
+        max-width: 900px;
+      }
+      article {
+        background: white;
+        padding: 28px;
+        border: 1px solid #e7e1ed;
+        border-radius: 14px;
+        margin: 20px 0;
+      }
+      a {
+        color: #65558a;
+        text-decoration: none;
+      }
+      h1 {
+        font-size: 28px;
+      }
+      p {
+        line-height: 1.8;
+        color: #777;
+      }
+      #result {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>f-tag · 页面标记测试</h1>
+    <article>
+      <strong><a href="/member/alice" id="author">Alice</a></strong>
+      <p>主题作者：用户名旁可以添加分级标签。</p>
+    </article>
+    <article id="reply">
+      <a href="/member/alice" id="reply-author">Alice</a>
+      <p>同一用户的回帖：标记会同步显示。</p>
+    </article>
+    <article>
+      <a href="/member/bob" id="bob">Bob</a>
+      <p>不同账号：保留各自独立的标记。</p>
+      <a href="/member/avatar"><img alt="Avatar" width="16" height="16" /></a
+      ><a href="https://other.example/member/alice">外站用户链接</a>
+    </article>
+    <div id="dynamic"></div>
+    <pre id="result">RUNNING</pre>
+    <script src="../extension/core.js"></script>
+    <script src="../extension/adapters.js"></script>
+    <script src="../extension/adapters/zhihu.js"></script>
+    <script src="../extension/adapters/v2ex.js"></script>
+    <script src="../extension/adapters/nodeseek.js"></script>
+    <script src="../extension/adapters/linuxdo.js"></script>
+    <script src="../extension/adapters/discuz.js"></script>
+    <script src="../extension/adapters/chiphell.js"></script>
+    <script src="../extension/adapters/52pojie.js"></script>
+    <script src="../extension/adapters/hostloc.js"></script>
+    <script src="../extension/adapters/generic.js"></script>
+    <script src="../extension/repository.js"></script>
+    <script src="mock-chrome.js"></script>
+    <script src="../extension/editor.js"></script>
+    <script src="../extension/content.js"></script>
+    <script src="fixture.js"></script>
+  </body>
+</html>
